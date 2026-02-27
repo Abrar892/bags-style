@@ -1,0 +1,4 @@
+node_modules/ 
+.next/ 
+.evn.local 
+.evn 
