@@ -37,11 +37,17 @@ export default async function Home() {
             .select('*')
             .order('created_at', { ascending: false });
 
+        console.log("========== SUPABASE DEBUG ==========");
+        console.log("Error:", error);
+        console.log("Rows:", data);
+        console.log("====================================");
+
         if (!error && data && data.length > 0) {
             products = data.map(mapDbProduct);
         }
-    } catch {
-        // Supabase unavailable — fall back to static data
+    } catch (err) {
+        console.error("SUPABASE CATCH ERROR");
+        console.error(err);
     }
 
     const structuredData = {

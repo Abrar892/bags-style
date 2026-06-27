@@ -2,7 +2,9 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Product } from '@/lib/data';
+import { generateSlug } from '@/lib/utils';
 
 const StarIcon = ({ filled }: { filled: boolean }) => (
     <svg
@@ -21,6 +23,9 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     const stars = product.rating ? Math.round(product.rating) : 5;
+    // Use DB slug if present, otherwise derive from name (for static fallback products)
+    const slug = (product as Product & { slug?: string }).slug || generateSlug(product.name);
+    const detailHref = `/products/${slug}`;
 
     return (
         <motion.div
@@ -43,85 +48,75 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </div>
             )}
 
-            {/* Image container */}
-            <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: '4/3' }}>
-                <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                    loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
+            {/* Entire card is a link to detail page */}
+            <Link href={detailHref} className="flex flex-col flex-1">
+                {/* Image */}
+                <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: '4/3' }}>
+                    <Image
+                        src={product.imageUrl}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                        loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
 
-            {/* Content */}
-            <div className="flex flex-col flex-1 p-5 gap-3">
-                {/* Category */}
-                <span className="text-xs font-inter font-medium tracking-widest uppercase text-rose-gold">
-                    {product.category}
-                </span>
+                {/* Content */}
+                <div className="flex flex-col flex-1 p-5 gap-3">
+                    {/* Category */}
+                    <span className="text-xs font-inter font-medium tracking-widest uppercase text-rose-gold">
+                        {product.category}
+                    </span>
 
-                {/* Product Name */}
-                <h3 className="font-playfair text-lg font-semibold leading-snug text-charcoal group-hover:text-dark-rose transition-colors duration-300">
-                    {product.name}
-                </h3>
+                    {/* Product Name */}
+                    <h3 className="font-playfair text-lg font-semibold leading-snug text-charcoal group-hover:text-dark-rose transition-colors duration-300">
+                        {product.name}
+                    </h3>
 
-                {/* Description */}
-                <p className="font-inter text-sm text-gray-500 leading-relaxed line-clamp-2 flex-1">
-                    {product.description}
-                </p>
+                    {/* Description */}
+                    <p className="font-inter text-sm text-gray-500 leading-relaxed line-clamp-2 flex-1">
+                        {product.description}
+                    </p>
 
-                {/* Rating */}
-                {product.rating && (
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                                <StarIcon key={i} filled={i < stars} />
-                            ))}
+                    {/* Rating */}
+                    {product.rating && (
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-0.5">
+                                {[...Array(5)].map((_, i) => (
+                                    <StarIcon key={i} filled={i < stars} />
+                                ))}
+                            </div>
+                            <span className="text-xs font-inter text-gray-400">
+                                {product.rating} ({product.reviews?.toLocaleString()})
+                            </span>
                         </div>
-                        <span className="text-xs font-inter text-gray-400">
-                            {product.rating} ({product.reviews?.toLocaleString()})
+                    )}
+
+                    {/* Price & CTA */}
+                    <div className="flex items-center justify-between pt-2 border-t border-rose-100">
+                        <div className="flex flex-col">
+                            <span className="font-playfair text-xl font-bold text-charcoal">{product.price}</span>
+                            {product.originalPrice && (
+                                <span className="text-xs font-inter text-gray-400 line-through">
+                                    {product.originalPrice}
+                                </span>
+                            )}
+                        </div>
+
+                        <span
+                            className="px-5 py-2.5 rounded-full text-xs font-inter font-semibold tracking-widest text-white transition-all duration-300"
+                            style={{
+                                background: 'linear-gradient(135deg, #D4AF37 0%, #C8A96E 50%, #B8933A 100%)',
+                                boxShadow: '0 6px 20px rgba(212, 175, 55, 0.35)',
+                            }}
+                        >
+                            View Deal
                         </span>
                     </div>
-                )}
-
-                {/* Price & CTA */}
-                <div className="flex items-center justify-between pt-2 border-t border-rose-100">
-                    <div className="flex flex-col">
-                        <span className="font-playfair text-xl font-bold text-charcoal">{product.price}</span>
-                        {product.originalPrice && (
-                            <span className="text-xs font-inter text-gray-400 line-through">
-                                {product.originalPrice}
-                            </span>
-                        )}
-                    </div>
-
-                    <motion.a
-                        href={product.affiliateUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.06 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-5 py-2.5 rounded-full text-xs font-inter font-semibold tracking-widest text-white transition-all duration-300"
-                        style={{
-                            background: 'linear-gradient(135deg, #D4AF37 0%, #C8A96E 50%, #B8933A 100%)',
-                            boxShadow: '0 6px 20px rgba(212, 175, 55, 0.35)',
-                        }}
-                        onMouseOver={(e) => {
-                            (e.currentTarget as HTMLElement).style.boxShadow =
-                                '0 10px 30px rgba(212, 175, 55, 0.55)';
-                        }}
-                        onMouseOut={(e) => {
-                            (e.currentTarget as HTMLElement).style.boxShadow =
-                                '0 6px 20px rgba(212, 175, 55, 0.35)';
-                        }}
-                    >
-                        Buy Now
-                    </motion.a>
                 </div>
-            </div>
+            </Link>
         </motion.div>
     );
 }
