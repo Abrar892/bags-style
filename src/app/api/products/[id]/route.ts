@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { generateSlug } from '@/lib/utils';
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -25,6 +26,12 @@ export async function PUT(
     if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
+
+    // Auto-generate slug if title changed and slug not explicitly set
+    if (body.title && !body.slug) {
+        body.slug = generateSlug(body.title);
+    }
+
     const { data, error } = await supabase
         .from('products')
         .update(body)

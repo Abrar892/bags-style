@@ -1,4 +1,4 @@
-node_modules/ 
-.next/ 
-.evn.local 
-.evn 
+node_modules/
+.next/
+.env.local
+.vs

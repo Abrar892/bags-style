@@ -76,3 +76,30 @@ CREATE POLICY "Users read own profile"
 -- 1. Create the user in Supabase Auth (Dashboard → Authentication → Users → Invite)
 -- 2. Then run:
 --    INSERT INTO profiles (id, role) VALUES ('<your-auth-user-uuid>', 'admin');
+
+-- ============================================================
+-- MIGRATION — Product Detail Page fields
+-- Run this in your Supabase SQL editor ONCE.
+-- All columns are optional — existing rows are unaffected.
+-- ============================================================
+
+ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS slug              text UNIQUE,
+    ADD COLUMN IF NOT EXISTS short_summary     text,
+    ADD COLUMN IF NOT EXISTS key_features      jsonb,
+    ADD COLUMN IF NOT EXISTS specifications    jsonb,
+    ADD COLUMN IF NOT EXISTS pros              jsonb,
+    ADD COLUMN IF NOT EXISTS cons              jsonb,
+    ADD COLUMN IF NOT EXISTS faq               jsonb,
+    ADD COLUMN IF NOT EXISTS seo_title         text,
+    ADD COLUMN IF NOT EXISTS seo_description   text,
+    ADD COLUMN IF NOT EXISTS related_products  jsonb;
+
+-- Index slug for fast lookups
+CREATE INDEX IF NOT EXISTS products_slug_idx ON products (slug);
+
+-- Backfill slugs for existing products that have none
+-- (optional — run only if you want existing products to be linkable)
+UPDATE products
+SET slug = lower(regexp_replace(regexp_replace(trim(title), '[^\w\s-]', '', 'g'), '[\s_]+', '-', 'g'))
+WHERE slug IS NULL AND title IS NOT NULL;

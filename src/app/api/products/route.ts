@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { generateSlug } from '@/lib/utils';
 
 // GET /api/products — public, returns all products ordered by created_at desc
 export async function GET() {
@@ -34,6 +35,19 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+
+    // Auto-generate slug from title if not already provided
+    if (!body.slug && body.title) {
+        const baseSlug = generateSlug(body.title);
+        // Ensure uniqueness by appending a short timestamp suffix if slug exists
+        const { data: existing } = await supabase
+            .from('products')
+            .select('id')
+            .eq('slug', baseSlug)
+            .maybeSingle();
+        body.slug = existing ? `${baseSlug}-${Date.now().toString(36)}` : baseSlug;
+    }
+
     const { data, error } = await supabase
         .from('products')
         .insert([body])
