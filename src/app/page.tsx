@@ -50,6 +50,9 @@ export default async function Home() {
         console.error(err);
     }
 
+    const productCount: number = products.length;
+    const categoryCount: number = new Set(products.map((product) => product.category)).size;
+
     const structuredData = {
         '@context': 'https://schema.org',
         '@type': 'Store',
@@ -91,7 +94,7 @@ export default async function Home() {
 
             <main className="relative">
                 <Navbar />
-                <HeroSection />
+                <HeroSection productCount={productCount} categoryCount={categoryCount} />
                 <CategorySection />
                 <ProductGrid
                     products={products}

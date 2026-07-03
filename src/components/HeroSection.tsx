@@ -18,7 +18,12 @@ const heroImages = [
     },
 ];
 
-export default function HeroSection() {
+interface HeroSectionProps {
+    productCount: number;
+    categoryCount: number;
+}
+
+export default function HeroSection({ productCount, categoryCount }: HeroSectionProps) {
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
             {/* Decorative background blobs */}
@@ -77,10 +82,10 @@ export default function HeroSection() {
                             transition={{ duration: 1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
                             className="section-title text-5xl sm:text-6xl lg:text-7xl text-charcoal leading-[1.05] mb-6"
                         >
-                            Curated for the{' '}
-                            <span className="text-gradient-rose italic">Discerning</span>
+                            Discover{' '}
+                            <span className="text-gradient-rose italic">Timeless</span>
                             <br />
-                            <span className="text-gradient-gold">Connoisseur</span>
+                            <span className="text-gradient-gold">Elegance</span>
                         </motion.h1>
 
                         {/* Subheading */}
@@ -132,9 +137,9 @@ export default function HeroSection() {
                             className="flex items-center gap-8 mt-12 justify-center lg:justify-start"
                         >
                             {[
-                                { value: '500+', label: 'Premium Brands' },
-                                { value: '12K+', label: 'Happy Clients' },
-                                { value: '4.9★', label: 'Rating' },
+                                { value: `${productCount}+`, label: 'Products' },
+                                { value: `${categoryCount}`, label: 'Categories' },
+                                { value: 'Trusted', label: 'Affiliate Partners' },
                             ].map((stat, i) => (
                                 <div key={i} className="text-center lg:text-left">
                                     <div className="font-playfair text-2xl font-bold text-charcoal">{stat.value}</div>
